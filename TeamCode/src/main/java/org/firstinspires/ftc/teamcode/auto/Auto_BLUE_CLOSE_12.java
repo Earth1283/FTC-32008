@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.auto;
 
 
 import static org.firstinspires.ftc.teamcode.constants.autoConstants.BLUE_CLOSE_FIRE_DISTANCE;
-
+// get consts from teamcode.consts.acst
 import static org.firstinspires.ftc.teamcode.constants.autoConstants.BLUE_CLOSE_OPEN_GATE;
 import static org.firstinspires.ftc.teamcode.constants.autoConstants.BLUE_CLOSE_OPEN_GATE_CONTROL_POINT;
 import static org.firstinspires.ftc.teamcode.constants.autoConstants.BLUE_CLOSE_SHOOT_SECOND_ROW_CONTROL_POINT;
@@ -103,7 +103,6 @@ public class Auto_BLUE_CLOSE_12 extends OpMode {
                         // shoot preload
                         new DrivePointToPoint(follower, BLUE_ClOSE_START, new Pose(46, 101, Math.toRadians(143))).setHoldEnd(false),
 
-
                         //发射
                         new InstantCommand(()->robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
                         new WaitCommand(1000),
@@ -123,7 +122,6 @@ public class Auto_BLUE_CLOSE_12 extends OpMode {
                         new DriveCurrentToPoint(follower, BLUE_CLOSE_OPEN_GATE_CONTROL_POINT, BLUE_CLOSE_OPEN_GATE).setHoldEnd(false), // smash the gate
                         // new InstantCommand(()->robot.intake.intakeStop()),
                         new InstantCommand(()->robot.intake.servoStop()),
-
 
                         // shoot first row
                         new InstantCommand(() -> robot.shooter.setShooterClose()),
