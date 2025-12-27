@@ -104,44 +104,44 @@ public class Auto_BLUE_CLOSE_12 extends OpMode {
                         new DrivePointToPoint(follower, BLUE_ClOSE_START, new Pose(46, 101, Math.toRadians(143))).setHoldEnd(false),
 
                         //发射
-                        new InstantCommand(()->robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
+                        new InstantCommand(() -> robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
                         new WaitCommand(1000),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.intake.transferToShooterStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.intake.transferToShooterStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         // intake first row
-                         new InstantCommand(()->robot.intake.intakeOut()),
+                        new InstantCommand(() -> robot.intake.intakeOut()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_INTAKE_FIRST_START).setHoldEnd(true),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.autoIntake()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.autoIntake()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_INTAKE_FIRST_END).setHoldEnd(false).setMaxPower(1),
-                        new InstantCommand(()->robot.intake.intakeStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.intake.intakeStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         new DriveCurrentToPoint(follower, BLUE_CLOSE_OPEN_GATE_CONTROL_POINT, BLUE_CLOSE_OPEN_GATE).setHoldEnd(false), // smash the gate
                         // new InstantCommand(()->robot.intake.intakeStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         // shoot first row
                         new InstantCommand(() -> robot.shooter.setShooterClose()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_SHOOT_FIRST_ROW).setHoldEnd(false),
 
                         //发射
-                        new InstantCommand(()->robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
+                        new InstantCommand(() -> robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
                         new WaitCommand(1000),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.intake.transferToShooterStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.intake.transferToShooterStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         // intake second row
-                         new InstantCommand(()->robot.intake.intakeOut()),
+                        new InstantCommand(() -> robot.intake.intakeOut()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_INTAKE_SECOND_START).setHoldEnd(true),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.autoIntake()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.autoIntake()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_INTAKE_SECOND_END).setHoldEnd(false).setMaxPower(1),
-                        new InstantCommand(()->robot.intake.intakeStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.intake.intakeStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         // shoot second row
                         new InstantCommand(() -> robot.shooter.setShooterClose()),
@@ -149,32 +149,32 @@ public class Auto_BLUE_CLOSE_12 extends OpMode {
 
 
                         //发射
-                        new InstantCommand(()->robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
+                        new InstantCommand(() -> robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
                         new WaitCommand(1000),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.intake.transferToShooterStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.intake.transferToShooterStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
 
                         // 吸第三条
-                         new InstantCommand(()->robot.intake.intakeOut()),
+                        new InstantCommand(() -> robot.intake.intakeOut()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_INTAKE_THIRD_START).setHoldEnd(true),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.autoIntake()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.autoIntake()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_INTAKE_THIRD_END).setHoldEnd(false).setMaxPower(1),
-                         new InstantCommand(()->robot.intake.intakeStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.intake.intakeStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         // 发射第三条
                         new InstantCommand(() -> robot.shooter.setShooterClose()),
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_SHOOT_THIRD_ROW).setHoldEnd(false),
 
                         //发射
-                        new InstantCommand(()->robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
+                        new InstantCommand(() -> robot.autoShoot3Close()), // Constantly open Intake, without transfer it should be fine
                         new WaitCommand(1000),
-                        new InstantCommand(()->robot.shooter.shooterStop()),
-                        new InstantCommand(()->robot.intake.transferToShooterStop()),
-                        new InstantCommand(()->robot.intake.servoStop()),
+                        new InstantCommand(() -> robot.shooter.shooterStop()),
+                        new InstantCommand(() -> robot.intake.transferToShooterStop()),
+                        new InstantCommand(() -> robot.intake.servoStop()),
 
                         // park
                         new DriveCurrentToPoint(follower, BLUE_ClOSE_PARK),
@@ -182,7 +182,6 @@ public class Auto_BLUE_CLOSE_12 extends OpMode {
                         new InstantCommand(this::stop)
 
                 )
-
 
 
         );

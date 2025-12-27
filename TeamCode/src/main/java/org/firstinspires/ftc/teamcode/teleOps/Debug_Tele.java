@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleOps;
 
+import static org.firstinspires.ftc.teamcode.constants.RobotConstants.autoEndH;
+import static org.firstinspires.ftc.teamcode.constants.RobotConstants.autoEndX;
+import static org.firstinspires.ftc.teamcode.constants.RobotConstants.autoEndY;
+import static org.firstinspires.ftc.teamcode.constants.RobotConstants.teleOpTargetX;
+import static org.firstinspires.ftc.teamcode.constants.RobotConstants.teleOpTargetY;
+
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -11,31 +17,65 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @TeleOp(name="Debug Tele", group="Debug")
 public class Debug_Tele extends LinearOpMode {
     Robot robot = new Robot();
-    double panelPos = .85;
+    double targetX = 140, targetY = 140;
+    
+    // Variables from A_Tele_AutoVel_AutoRotate
+    int turretTargetHeading = 0;
+    double targetATAN, turretCurrentHeading;
+
     boolean shooterOn = false;
+    double distance;
     JoinedTelemetry joinedTele;
+    boolean chasisAutoAim = false;
+
+    double distanceOffset = 0;
+    int velo = 1500;
     double velocityCorrection = 1350;
     ElapsedTime timer = new ElapsedTime();
+    double panelPos = .85;
+
     boolean intakeStateStop1 = false, intakeStateStop2 = false, intakeOut1State = false, intakeOut2State = false;
+
+    ScheduledExecutorService exec = Executors.newScheduledThreadPool(50);
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
         joinedTele = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
 
+        // Initialization logic from A_Tele_AutoVel_AutoRotate
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        targetX = teleOpTargetX;
+        targetY = teleOpTargetY;
+        
         waitForStart();
-
-        robot.shooter.setShooterClose();
+        
+        // Reset logic from A_Tele_AutoVel_AutoRotate
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
+        robot.drivetrain.pinPoint.setPosition(new Pose2D(DistanceUnit.INCH, autoEndY, 144 - autoEndX, AngleUnit.RADIANS, autoEndH - Math.PI / 2.0));
 
         while (opModeIsActive()) {
-            robot.drivetrain.drive(gamepad1, 0.8, true);
+            // Drive logic from A_Tele_AutoVel_AutoRotate
+            robot.drivetrain.driveConstantOriented(gamepad1, chasisAutoAim);
+            
+            // Calc distance/position
+            Pose2D current = robot.drivetrain.getPosition();
+            distance = Math.abs(Math.hypot(targetY - current.getY(DistanceUnit.INCH), targetX - current.getX(DistanceUnit.INCH)));
 
-            // Intake Logic
+            // Intake Logic - Gamepad 1 (Mirrored)
             if (gamepad1.left_trigger > 0) {
                 robot.intake.intakeOut();
                 shooterOn = false;
@@ -50,6 +90,7 @@ public class Debug_Tele extends LinearOpMode {
                 intakeOut1State = true;
             }
 
+            // Intake/Transfer Logic - Gamepad 2 (Mirrored)
             if (gamepad2.right_bumper) {
                  intakeStateStop2 = false;
                  robot.intake.intakeIn();
@@ -64,22 +105,12 @@ public class Debug_Tele extends LinearOpMode {
                 intakeOut2State = true;
                 robot.intake.transferToShooterStop();
             }
-
+            
             if (intakeStateStop1 && intakeStateStop2 && intakeOut1State && intakeOut2State) {
                 robot.intake.intakeStop();
             }
 
-            // Shooter Settings
-            if (gamepad2.x) {
-                robot.shooter.setShooterClose();
-            }
-            else if (gamepad2.y) {
-                robot.shooter.setShooter80();
-            }
-            else if (gamepad2.b) {
-                robot.shooter.setShooterFar();
-            }
-
+            // Shooter Presets (Mirrored)
             if (gamepad2.xWasPressed()) {
                 velocityCorrection = 1850;
                 panelPos = 0.78;
@@ -90,7 +121,7 @@ public class Debug_Tele extends LinearOpMode {
                 panelPos = 0.85;
             }
 
-            // Manual Adjustments
+            // Manual Adjustments (Mirrored)
             if (gamepad2.dpadUpWasPressed()) velocityCorrection += 50;
             if (gamepad2.dpadDownWasPressed()) velocityCorrection -= 50;
             if (gamepad2.dpadLeftWasPressed()) panelPos -= 0.01;
@@ -99,8 +130,9 @@ public class Debug_Tele extends LinearOpMode {
             if (panelPos < 0) panelPos = 0;
             if (panelPos > 1) panelPos = 1;
 
+            // Shooter Toggle (Mirrored)
             if (gamepad2.leftBumperWasPressed()) {
-                robot.schedule(() -> shooterOn = !shooterOn, 200, TimeUnit.MILLISECONDS);
+                exec.schedule(() -> shooterOn = !shooterOn, 200, TimeUnit.MILLISECONDS);
                 timer.reset();
             }
 
@@ -110,7 +142,13 @@ public class Debug_Tele extends LinearOpMode {
                 robot.shooter.shooterStop();
             }
 
-            // --- ADVANCED TELEMETRY ---
+            // Chassis Auto Aim Toggle (Mirrored)
+            if (gamepad1.bWasPressed()) {
+                chasisAutoAim = !chasisAutoAim;
+                gamepad1.rumbleBlips(1);
+            }
+
+            // --- ADVANCED TELEMETRY (DEBUG MODE FEATURE) ---
             telemetry.addLine("=== SHOOTER DEBUG ===");
             telemetry.addData("Shooter ON", shooterOn);
             telemetry.addData("Target Velocity", velocityCorrection);
@@ -119,10 +157,11 @@ public class Debug_Tele extends LinearOpMode {
             telemetry.addData("Panel Position", "%.3f", panelPos);
 
             telemetry.addLine("\n=== POSITION DEBUG ===");
-            Pose2D pose = robot.drivetrain.getPosition();
-            telemetry.addData("X (in)", "%.2f", pose.getX(DistanceUnit.INCH));
-            telemetry.addData("Y (in)", "%.2f", pose.getY(DistanceUnit.INCH));
-            telemetry.addData("Heading", "%.2f°", pose.getHeading(AngleUnit.DEGREES));
+            telemetry.addData("X (in)", "%.2f", current.getX(DistanceUnit.INCH));
+            telemetry.addData("Y (in)", "%.2f", current.getY(DistanceUnit.INCH));
+            telemetry.addData("Heading", "%.2f°", current.getHeading(AngleUnit.DEGREES));
+            telemetry.addData("Distance to Target", "%.2f", distance);
+            telemetry.addData("Chassis Auto Aim", chasisAutoAim);
 
             telemetry.addLine("\n=== DRIVE DEBUG ===");
             telemetry.addData("Stick Y", gamepad1.left_stick_y);
@@ -130,8 +169,8 @@ public class Debug_Tele extends LinearOpMode {
             telemetry.addData("Stick RX", gamepad1.right_stick_x);
 
             joinedTele.update();
+            robot.drivetrain.pinPoint.update();
         }
         robot.shooter.shooterStop();
-        robot.stop();
     }
 }
