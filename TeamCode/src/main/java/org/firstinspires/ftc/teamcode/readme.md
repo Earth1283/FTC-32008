@@ -67,8 +67,39 @@ These OpModes are located in the `teleOps` package.
     *   **Features:** Includes specific target coordinates and continuous distance calculation logic.
 
 *   **`Debug_Tele`**
-    *   **Description:** A TeleOp mode focused on debugging hardware and tuning values.
-    *   **Features:** detailed telemetry data for shooter velocity, current, position, and controller inputs.
+    *   **Description:** A specialized diagnostic mode that mirrors the control scheme of `A_Tele_AutoVel_AutoRotate` but adds comprehensive real-time telemetry.
+    *   **Diagnostic Features:**
+        *   **Shooter Debug:** Displays target vs. actual velocity for both motors and the current panel servo position.
+        *   **Position Debug:** Shows precise X/Y coordinates and heading from the PinPoint sensor, plus live "Distance to Target" calculations.
+        *   **Drive Debug:** Monitors raw stick inputs to verify controller hardware health.
+    *   **Manual Tuning (Gamepad 2):**
+        *   **D-pad Up/Down:** Fine-tune target velocity (+/- 50).
+        *   **D-pad Left/Right:** Fine-tune panel position (+/- 0.01).
+        *   **X/B Buttons:** Reset to specific tuning presets (High/Low power).
+
+    #### **Keybinds (Mirrored from Main TeleOp)**
+
+    **Gamepad 1: Driver**
+
+| Control | Action |
+| :--- | :--- |
+| **Left Stick** | Robot Translation (Forward/Backward/Strafe) |
+| **Right Stick** | Robot Rotation (Turn) |
+| **Right Trigger** | Intake **IN** |
+| **Left Trigger** | Intake **OUT** (Also disables shooter) |
+| **B Button** | Toggle **Chassis Auto-Aim** (Rumbles on toggle) |
+
+    **Gamepad 2: Operator**
+
+| Control | Action |
+| :--- | :--- |
+| **Left Bumper** | Toggle **Shooter ON/OFF** |
+| **Right Bumper** | Intake **IN** + Transfer **UP** |
+| **Right Trigger** | Intake **OUT** + Transfer **DOWN** |
+| **X Button** | **High Power Preset** (Vel: 1850, Pos: 0.78) |
+| **B Button** | **Standard Preset** (Vel: 1350, Pos: 0.85) |
+| **D-pad Up/Down** | Fine-tune **Velocity** (+/- 50) |
+| **D-pad Left/Right** | Fine-tune **Panel Position** (+/- 0.01) |
 
 ## Test OpModes
 
