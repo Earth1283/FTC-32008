@@ -50,7 +50,7 @@ abstract class CompetitionTeleOp extends KernelOpMode {
         Pose saved = PoseStore.peek();
         if (saved == null) {
             // Keep the standalone fallback in the original Pinpoint units.
-            return new Pose2D(DistanceUnit.INCH, 71.75, 9.0, AngleUnit.RADIANS, 90.0);
+            return new Pose2D(DistanceUnit.INCH, 71.75, 9.0, AngleUnit.DEGREES, 90.0);
         }
         return new Pose2D(DistanceUnit.INCH, saved.getX(), saved.getY(), AngleUnit.RADIANS, saved.getHeading());
     }
