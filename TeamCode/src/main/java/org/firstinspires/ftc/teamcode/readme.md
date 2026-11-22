@@ -1,10 +1,14 @@
-## TeamCode Module
+# FTC 32008 TeamCode
+
+- [TeamCode 使用说明](../../../../../../../../doc/TeamCode使用说明.md)涵盖硬件配置、自动路线、手柄和调试入口。
+- [TeamCode 程序核查](../../../../../../../../doc/TeamCode程序核查.md)记录源码发现和实车验证项。
+
+## FTC SDK 模板说明
 
 Welcome!
 
-This module, TeamCode, is the place where you will write/paste the code for your team's
-robot controller App. This module is currently empty (a clean slate) but the
-process for adding OpModes is straightforward.
+Use this module to add OpModes for your team's Robot Controller app. The instructions
+below describe the FTC SDK workflow for adding new OpModes.
 
 ## Creating your own OpModes
 

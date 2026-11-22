@@ -1,0 +1,100 @@
+package org.firstinspires.ftc.teamcode.kernel.input;
+
+import com.qualcomm.robotcore.hardware.Gamepad;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+
+public final class SdkPadSource implements PadSource {
+    private final Supplier<Gamepad> gamepad;
+
+    public SdkPadSource(Supplier<Gamepad> gamepad) {
+        this.gamepad = gamepad;
+    }
+
+    @Override
+    public boolean isDown(Key key) {
+        Gamepad g = gamepad.get();
+        switch (key) {
+            case A: return g.a;
+            case B: return g.b;
+            case X: return g.x;
+            case Y: return g.y;
+            case DPAD_UP: return g.dpad_up;
+            case DPAD_DOWN: return g.dpad_down;
+            case DPAD_LEFT: return g.dpad_left;
+            case DPAD_RIGHT: return g.dpad_right;
+            case LEFT_BUMPER: return g.left_bumper;
+            case RIGHT_BUMPER: return g.right_bumper;
+            case LEFT_STICK_BUTTON: return g.left_stick_button;
+            case RIGHT_STICK_BUTTON: return g.right_stick_button;
+            case BACK: return g.back;
+            case START: return g.start;
+            case GUIDE: return g.guide;
+            case TOUCHPAD: return g.touchpad;
+            case LEFT_TRIGGER: return g.left_trigger >= Trigger.DEFAULT_THRESHOLD;
+            case RIGHT_TRIGGER: return g.right_trigger >= Trigger.DEFAULT_THRESHOLD;
+            default: throw new IllegalArgumentException(key.name());
+        }
+    }
+
+    @Override
+    public boolean takePress(Key key, BooleanSupplier sampledPress) {
+        Gamepad g = gamepad.get();
+        switch (key) {
+            case A: return g.aWasPressed();
+            case B: return g.bWasPressed();
+            case X: return g.xWasPressed();
+            case Y: return g.yWasPressed();
+            case DPAD_UP: return g.dpadUpWasPressed();
+            case DPAD_DOWN: return g.dpadDownWasPressed();
+            case DPAD_LEFT: return g.dpadLeftWasPressed();
+            case DPAD_RIGHT: return g.dpadRightWasPressed();
+            case LEFT_BUMPER: return g.leftBumperWasPressed();
+            case RIGHT_BUMPER: return g.rightBumperWasPressed();
+            case LEFT_STICK_BUTTON: return g.leftStickButtonWasPressed();
+            case RIGHT_STICK_BUTTON: return g.rightStickButtonWasPressed();
+            case BACK: return g.backWasPressed();
+            case START: return g.startWasPressed();
+            case GUIDE: return g.guideWasPressed();
+            case TOUCHPAD: return g.touchpadWasPressed();
+            case LEFT_TRIGGER: return g.leftTriggerWasPressed();
+            case RIGHT_TRIGGER: return g.rightTriggerWasPressed();
+            default: throw new IllegalArgumentException(key.name());
+        }
+    }
+
+    @Override
+    public double axis(PadAxis axis) {
+        Gamepad g = gamepad.get();
+        switch (axis) {
+            case LEFT_STICK_RIGHT: return g.left_stick_x;
+            case LEFT_STICK_UP: return -g.left_stick_y;
+            case RIGHT_STICK_RIGHT: return g.right_stick_x;
+            case RIGHT_STICK_UP: return -g.right_stick_y;
+            case LEFT_TRIGGER: return g.left_trigger;
+            case RIGHT_TRIGGER: return g.right_trigger;
+            default: throw new IllegalArgumentException(axis.name());
+        }
+    }
+
+    @Override
+    public boolean connected() {
+        return gamepad.get().getGamepadId() != Gamepad.ID_UNASSOCIATED;
+    }
+
+    @Override
+    public void rumble(double left, double right, int millis) {
+        gamepad.get().rumble(left, right, millis);
+    }
+
+    @Override
+    public void rumbleBlips(int count) {
+        gamepad.get().rumbleBlips(count);
+    }
+
+    @Override
+    public void led(double red, double green, double blue) {
+        gamepad.get().setLedColor(red, green, blue, Gamepad.LED_DURATION_CONTINUOUS);
+    }
+}
