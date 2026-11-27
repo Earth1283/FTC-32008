@@ -2,6 +2,8 @@
 
 This repository contains the public FTC SDK for the BIOBUZZ (2026-2027) competition season.
 
+View our team's official source code documentaiton at: https://ftc-32008.readthedocs.io/en/latest/
+
 ## Welcome!
 This GitHub repository contains the source code that is used to build an Android app to control a *FIRST* Tech Challenge competition robot.  To use this SDK, download/clone the entire project to your local computer.
 
