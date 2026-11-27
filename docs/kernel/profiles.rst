@@ -8,3 +8,18 @@ A ``RobotProfile`` constructs the implementation used for each standard subsyste
 A subsystem implements ``Subsystem``. Its ``init()`` returns an initialization result; ``update()`` runs once per tick; ``report()`` contributes status; and ``stop()`` releases or stops outputs. Startup checks cover hubs, battery, the localizer when present, installed subsystems, and profile init tasks. A critical failure aborts initialization.
 
 The competition profile installs ``Shooter``, ``autoTurretAim``, and the competition ``Intake`` as custom subsystems. TeleOp also installs ``Drivetrain``; autonomous instead supplies a Pedro follower. The generic ``kernel.subsystems.Intake`` and competition ``subsystems.Intake`` are different types, so imports matter. ``CompetitionProfile`` disables kernel-managed bulk caching and gamepad alliance lights.
+
+.. mermaid::
+
+   flowchart TB
+       accTitle: Competition profile wiring
+       accDescr: Both profiles install Shooter, autoTurretAim, and the competition Intake. TeleOp installs Drivetrain. Autonomous provides the follower that Robot wraps in PedroMotion.
+       tele["CompetitionProfile.teleOp()"] -->|custom| shared["Shooter, autoTurretAim,<br/>competition Intake"]
+       auto["CompetitionProfile.autonomous(...)"] -->|custom| shared
+       tele -->|custom| drive["Drivetrain"]
+       auto -->|follower| follower["Pedro Follower"]
+       shared --> registry["Robot registers in Kernel"]
+       drive --> registry
+       follower --> motion["Robot wraps in PedroMotion"]
+       registry --> lookup["robot.require(Type.class)"]
+       motion --> api["robot.motion"]

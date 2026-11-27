@@ -1,2 +1,3 @@
 Sphinx>=8.2,<9
 sphinx-rtd-theme>=3.0,<4
+sphinxcontrib-mermaid>=2.0.2,<3
