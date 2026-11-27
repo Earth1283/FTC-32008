@@ -14,13 +14,6 @@ A tick runs in this order:
 5. Update the scheduler and match clock, then dispatch queued events.
 6. Publish the status display when telemetry is due.
 
-Input is sampled during init, but bindings are disarmed until start. A
-runtime exception in a tick stops outputs and reports a kernel panic.
-Subsystem ``stop()`` implementations should be idempotent and must not throw.
+Input is sampled during init, but bindings are disarmed until start. A runtime exception in a tick stops outputs and reports a kernel panic. Subsystem ``stop()`` implementations should be idempotent and must not throw.
 
-``robot.awaitStart()``, ``waitUntil``, ``sleep``, and ``await`` keep ticking
-while waiting in a linear OpMode. Do not call these waiting methods from a
-loop callback or another tick: the kernel detects reentrant ticks. A
-``KernelOpMode`` already handles waiting and ticking, so put work in its
-hooks. A plain SDK OpMode can instead construct ``Robot`` and must arrange
-its own calls to ``tick``.
+``robot.awaitStart()``, ``waitUntil``, ``sleep``, and ``await`` keep ticking while waiting in a linear OpMode. Do not call these waiting methods from a loop callback or another tick: the kernel detects reentrant ticks. A ``KernelOpMode`` already handles waiting and ticking, so put work in its hooks. A plain SDK OpMode can instead construct ``Robot`` and must arrange its own calls to ``tick``.
