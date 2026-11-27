@@ -10,7 +10,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+@Autonomous(name = "Flower - Park Only")
 public class FLOWER_0TIP extends CompetitionAuto {
     @Override
     protected Pose startingPose() {
@@ -21,9 +21,9 @@ public class FLOWER_0TIP extends CompetitionAuto {
     protected Command buildRoute() {
         return new SequentialCommandGroup(
 
+                // Drive straight to the parking point and interpolate between the start and end headings.
                 fromPose(robot.motion, RED_PARK_S, RED_PARK_E),
-
-                new InstantCommand(robot.motion::cancel)
+                new InstantCommand(this::requestOpModeStop)
         );
     }
 }

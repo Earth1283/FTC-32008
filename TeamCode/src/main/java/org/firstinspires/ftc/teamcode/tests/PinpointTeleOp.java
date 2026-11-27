@@ -270,7 +270,7 @@ public class PinpointTeleOp extends LinearOpMode {
         if (flipX || flipY) {
             applyDirectionsReliably(odo, dirX, dirY);
             pendingZero = true;
-            dirNote = String.format(Locale.US, "Flipped ENC %s - 已重置零点，请再次推动小车测试。",
+            dirNote = String.format(Locale.US, "Flipped ENC %s - Zero reset. Push the robot again to retest.",
                     flipX && flipY ? "X and Y" : flipX ? "X" : "Y");
         } else if (pendingZero) {
             pendingZero = false;
@@ -286,9 +286,9 @@ public class PinpointTeleOp extends LinearOpMode {
         Pose2D p = odo.getPosition();
 
         tel.addLine("STEP 1 of 4   POD DIRECTION");
-        tel.addLine("前推小车约1英尺: ENC X 的 counts 和 moved x 必须增加 (+)");
-        tel.addLine("左推小车约1英尺: ENC Y 的 counts 和 moved y 必须增加 (+)");
-        tel.addLine("如果为负数，按 X 翻转 X 轴，按 Y 翻转 Y 轴。");
+        tel.addLine("Push forward about 1 ft. X encoder counts and X distance should increase (+).");
+        tel.addLine("Push left about 1 ft. Y encoder counts and Y distance should increase (+).");
+        tel.addLine("If either reading decreases, press X or Y to reverse that axis.");
         tel.addLine("");
         tel.addData("ENC X", "counts %+d   %s   (raw pod %+d)   [X flips]",
                 signed(rawDx, dirX), dirX, rawDx);
@@ -298,12 +298,12 @@ public class PinpointTeleOp extends LinearOpMode {
                 p.getX(DistanceUnit.INCH) - START_X_IN,
                 p.getY(DistanceUnit.INCH) - START_Y_IN,
                 p.getHeading(AngleUnit.DEGREES) - START_H_DEG);
-        tel.addLine("(raw pod 是编码器物理原始值，翻转时它不会变，看前面的 counts 和 moved 即可)");
+        tel.addLine("Use the counts and distance above to verify direction. Raw pod values stay the same when flipped.");
         if (!dirNote.isEmpty()) {
             tel.addLine(dirNote);
         }
         tel.addLine("");
-        tel.addLine("A = 在此位置清零(Zero)      RB = 进入下一步(Scale)");
+        tel.addLine("A = Zero here       RB = Next step (Scale)");
     }
 
     private static int signed(int ticks, GoBildaPinpointDriver.EncoderDirection dir) {

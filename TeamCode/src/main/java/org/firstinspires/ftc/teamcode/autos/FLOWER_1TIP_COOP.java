@@ -19,7 +19,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+@Autonomous(name = "Flower - Preload, Collect and Park")
 public class FLOWER_1TIP_COOP extends CompetitionAuto {
     @Override
     protected Pose startingPose() {
@@ -29,36 +29,42 @@ public class FLOWER_1TIP_COOP extends CompetitionAuto {
     @Override
     protected Command buildRoute() {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> distanceCorrection = 2.0),
-
+                // Spin up the flywheel before feeding the preload.
+                // Preload angle needs robot calibration for the current starting pose. Feeding is skipped until calibrated.
+                fixedShot.prepare(1120, Double.NaN),
                 new WaitCommand(SHOOTER_START_TIME),
                 new WaitCommand(5000),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
 
+                // Flower 1 needs about 163° at the current endpoint. Feeding is skipped until calibrated.
+                fixedShot.prepare(1120, Double.NaN),
+                // Drive to the Flower 1 collection area within the timed window.
+                // The timer ends the command group while driving and intake run in parallel.
                 new ParallelDeadlineGroup(
                         new WaitCommand(2500),
                         new SequentialCommandGroup(
-                                new InstantCommand(() -> intake.shovelDown()),
+                                new InstantCommand(intake::shovelDown),
                                 fromPose(robot.motion, RED_START_FLOWER, RED_INTAKE_FLOWER_1_FROM_PRELOAD_1),
-                                new InstantCommand(() -> intake.intakeIn()),
+                                new InstantCommand(intake::intakeIn),
                                 fromCurrentPose(robot.motion, RED_INTAKE_FLOWER_1_FROM_PRELOAD_2)
                         )
                 ),
                 new WaitCommand(FLOWER_RELOAD_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
                 new WaitCommand(SHOOTER_READY_TIME),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
-                new InstantCommand(() -> doneShooting = true),
+                new InstantCommand(intake::intakeStop),
+                new InstantCommand(shooter::stop),
 
+                // Drive to the parking point and let the robot settle before handing off its pose.
                 fromCurrentPose(robot.motion, RED_PARK_FROM_FLOWER),
                 new WaitCommand(1000),
 
                 new WaitCommand(100),
-                new InstantCommand(robot.motion::cancel)
+                new InstantCommand(this::requestOpModeStop)
         );
     }
 }

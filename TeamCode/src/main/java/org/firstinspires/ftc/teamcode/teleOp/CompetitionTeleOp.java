@@ -76,7 +76,7 @@ abstract class CompetitionTeleOp extends KernelOpMode {
         } else if (robot.gp1.leftTrigger.value() > triggerThreshold) {
             intake.intakeOut();
         } else if (robot.gp1.rightBumper.isDown()) {
-            intake.intakeFeed();
+            intake.intakeFeedWithGateDelay();
         } else {
             intake.intakeStop();
         }

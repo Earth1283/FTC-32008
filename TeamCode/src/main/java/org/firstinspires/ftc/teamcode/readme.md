@@ -1,9 +1,54 @@
 # FTC 32008 TeamCode
 
-- [TeamCode 使用说明](../../../../../../../../doc/TeamCode使用说明.md)涵盖硬件配置、自动路线、手柄和调试入口。
-- [TeamCode 程序核查](../../../../../../../../doc/TeamCode程序核查.md)记录源码发现和实车验证项。
+Competition OpModes use [the FTC-32008 kernel](kernel/KernelOpMode.java) for startup,
+device updates, telemetry, and shutdown. The [competition profile](subsystems/CompetitionProfile.java)
+binds the robot hardware using the names in [robotConfigs.java](constants/robotConfigs.java).
 
-## FTC SDK 模板说明
+## Autonomous
+
+All seven routes use red alliance field coordinates. Positions are in inches and Java
+headings are in radians. Check the starting pose on the Panels field view after INIT.
+
+| Driver Station name | Starting pose (X, Y, heading) | Parking pose |
+| --- | --- | --- |
+| Flower - Park Only | (33, 135, 0°) | (10, 115, 0°) |
+| Flower - Preload and Park | (33, 135, 0°) | (10, 115, 0°) |
+| Flower - Preload, Collect and Park | (61, 134.5, 180°) | (9, 120, 0°) |
+| Garden - 2 Tips Solo | (57, 6.7, 180°) | (9, 95, 90°) |
+| Garden - 2 Tips Solo (Sure) | (57, 6.7, 180°) | (14, 95, 90°) |
+| Garden - 3 Tips Cooperative | (57, 6.7, 180°) | (9, 95, 90°) |
+| Garden - 3 Tips Solo | (57, 6.7, 180°) | (9, 95, 90°) |
+
+Waypoints and shared timings live in [AutoConst.java](constants/AutoConst.java).
+Shots use fixed flywheel speeds and turret angles relative to the chassis. A
+`Double.NaN` angle marks a shot awaiting calibration. The route skips feeding
+for that shot. The kernel saves the measured pose and alliance at shutdown for
+TeleOp in the same Robot Controller process.
+
+## TeleOp
+
+- **TeleOp Robot Centric** and **TeleOp Field Centric** share the same controls. In Panels,
+  set the starting pose and alliance during INIT or set `USE_CUSTOM_START_POSE` to
+  false to resume from autonomous. `HEADLESS_FORWARD_DEG` sets the forward stick
+  direction in field-centric mode.
+- Gamepad 1 steers, collects with RT, ejects with LT, toggles the flywheel with LB,
+  and feeds with RB after a 100 ms gate delay. Y raises the shovels and A lowers them.
+- In both turret modes, D-pad up/down on either gamepad trims the measured flywheel
+  baseline by 10 ticks/s. Gamepad 2 D-pad left/right trims the active target's aim
+  by 2° and Y/A adjusts the panel.
+- **tele** resumes from autonomous and uses motion-compensated turret aim.
+  Gamepad 1 touchpad toggles robot-centric driving with the turret centered.
+  Gamepad 2 LB toggles the shovels.
+
+## Diagnostics
+
+Use **Shooter Distance Test** to compare the turret's calculated distance with
+an independent field calculation and see each flywheel's signed encoder speed,
+power, and analog input voltages. Press gamepad 2 X after speed stabilizes to
+record a sample. **Auto Turret Aim Test**, **Servo Position Test**,
+**Shovel Position Test**, and **Pinpoint Auto Tuner** cover the related hardware.
+
+## FTC SDK template
 
 Welcome!
 

@@ -23,6 +23,17 @@ import java.util.function.Function;
 public class Shooter implements Subsystem {
     private DcMotorEx upShooter, downShooter;
     private Servo panel;
+    private double motorVelocityTarget;
+
+    // Measured distance in inches and flywheel speed in ticks per second.
+    private static final double[][] MEASURED_FLYWHEEL_POINTS = {
+            {34.72, 1120.0},
+            {40.03, 1120.0},
+            {44.35, 1120.0},
+            {49.06, 1120.0},
+            {52.24, 1140.0},
+            {57.254, 1160.0}
+    };
 
     public static double POLLEN_SHOOTER_P = 13.0;
     public static double POLLEN_SHOOTER_F = 14.0;
@@ -42,9 +53,9 @@ public class Shooter implements Subsystem {
     public static double PANEL_FAR_DISTANCE_IN = 100.0;
     public static double PANEL_FAR_POSITION = 0.45;
 
-    public static double POLLEN_KP = 0.00022;
-    public static double POLLEN_KV = 0.00037;
-    public static double POLLEN_KS = 0.165;
+    public static double POLLEN_KP = 0.00085;
+    public static double POLLEN_KV = 0.00038;
+    public static double POLLEN_KS = 0.2;
 
     public void init(HardwareMap hardwareMap) {
         bind(name -> hardwareMap.get(DcMotorEx.class, name), hardwareMap.get(Servo.class, PANEL));
@@ -124,6 +135,23 @@ public class Shooter implements Subsystem {
         return Range.clip(target, min, max);
     }
 
+    /** Interpolates between measured shots and uses the nearest endpoint outside the table. */
+    public double getMeasuredFlywheelVelocity(double distanceInches) {
+        if (!Double.isFinite(distanceInches) || distanceInches < 0.0) return Double.NaN;
+
+        double[] near = MEASURED_FLYWHEEL_POINTS[0];
+        if (distanceInches <= near[0]) return near[1];
+        for (int i = 1; i < MEASURED_FLYWHEEL_POINTS.length; i++) {
+            double[] far = MEASURED_FLYWHEEL_POINTS[i];
+            if (distanceInches <= far[0]) {
+                double fraction = (distanceInches - near[0]) / (far[0] - near[0]);
+                return near[1] + (far[1] - near[1]) * fraction;
+            }
+            near = far;
+        }
+        return near[1];
+    }
+
     public double f(double a, double b, double c, double d, double x) {
         return a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
     }
@@ -149,13 +177,39 @@ public class Shooter implements Subsystem {
         setPollenMotorVelocity(target, getPollenVelocity());
     }
 
+    /** Sets a fixed autonomous speed that the kernel maintains on each tick. */
+    public void setMotorVelocity(double targetVelocity) {
+        double max = POLLEN_VELOCITY_MAX;
+        if (!Double.isFinite(targetVelocity) || targetVelocity <= 0.0
+                || !Double.isFinite(max) || max <= 0.0) {
+            stop();
+            return;
+        }
+        motorVelocityTarget = Math.min(targetVelocity, max);
+        update();
+    }
+
+    public boolean hasMotorVelocityTarget() {
+        return motorVelocityTarget > 0.0;
+    }
+
+    @Override
+    public void update() {
+        if (hasMotorVelocityTarget()) setPollenMotorVelocity(motorVelocityTarget);
+    }
+
     public void setPollenMotorVelocity(double target, double measuredVelocity) {
+        if (!Double.isFinite(target) || target <= 0.0 || !Double.isFinite(measuredVelocity)) {
+            setPollenPower(0.0);
+            return;
+        }
         double error = target - measuredVelocity;
         setPollenPower(POLLEN_KS + target * POLLEN_KV + error * POLLEN_KP);
     }
 
     @Override
     public void stop() {
+        motorVelocityTarget = 0.0;
         upShooter.setPower(0);
         downShooter.setPower(0);
     }

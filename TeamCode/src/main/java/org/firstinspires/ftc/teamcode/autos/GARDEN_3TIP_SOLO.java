@@ -35,7 +35,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+@Autonomous(name = "Garden - 3 Tips Solo")
 public class GARDEN_3TIP_SOLO extends CompetitionAuto {
     @Override
     protected Pose startingPose() {
@@ -45,14 +45,14 @@ public class GARDEN_3TIP_SOLO extends CompetitionAuto {
     @Override
     protected Command buildRoute() {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> distanceCorrection = 0.0),
-                new InstantCommand(() -> degreeCorrection = 0.0),
-
+                // Spin up for the preload shot.
+                fixedShot.prepare(1120, 89.6),
                 new WaitCommand(SHOOTER_START_TIME),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
 
+                // Slow down through Garden while the intake starts on a delay.
                 new ParallelDeadlineGroup(
                         new WaitCommand(2100),
                         new SequentialCommandGroup(
@@ -61,38 +61,43 @@ public class GARDEN_3TIP_SOLO extends CompetitionAuto {
                         ),
                         new SequentialCommandGroup(
                                 new WaitCommand(1800),
-                                new InstantCommand(() -> intake.intakeIn())
+                                new InstantCommand(intake::intakeIn)
                         )
                 ),
 
-                new InstantCommand(() -> degreeCorrection = -2.0),
+                // Prepare the Garden shot while driving to the shooting position.
+                fixedShot.prepare(1120, 104.5),
                 new ParallelCommandGroup(
                         fromCurrentPose(robot.motion, RED_SHOOT_GARDEN_CONTROL_1, RED_SHOOT_GARDEN_CONTROL_2, RED_SHOOT_GARDEN),
                         new SequentialCommandGroup(
                                 new WaitCommand(300),
-                                new InstantCommand(() -> intake.intakeStop()),
+                                new InstantCommand(intake::intakeStop),
                                 new WaitCommand(1500),
-                                new InstantCommand(() -> intake.shovelDown())
+                                new InstantCommand(intake::shovelDown)
                         )
                 ),
                 new WaitCommand(SHOOTER_READY_TIME),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeIn()),
+                new InstantCommand(intake::intakeIn),
 
+                // Flower 1 needs about 164° at the current endpoint. Feeding is skipped until calibrated.
+                fixedShot.prepare(1120, Double.NaN),
+                // Drive to the Flower 1 collection area within the timed window.
                 new ParallelDeadlineGroup(
                         new WaitCommand(1000),
                         fromCurrentPose(robot.motion, RED_INTAKE_FLOWER_1)
                 ),
                 new WaitCommand(FLOWER_RELOAD_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
 
+                // Pause briefly after collecting, then open the gate and feed.
                 new WaitCommand(SHOOTER_READY_TIME),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
 
-                new InstantCommand(() -> degreeCorrection = 0.0),
+                // Follow the curve to the partner-side collection area, raising the shovels and starting the intake along the way.
                 new ParallelDeadlineGroup(
                         new WaitCommand(2700),
                         new SequentialCommandGroup(
@@ -101,49 +106,55 @@ public class GARDEN_3TIP_SOLO extends CompetitionAuto {
                         ),
                         new SequentialCommandGroup(
                                 new WaitCommand(500),
-                                new InstantCommand(() -> intake.shovelUp()),
+                                new InstantCommand(intake::shovelUp),
                                 new WaitCommand(500),
-                                new InstantCommand(() -> intake.intakeIn())
+                                new InstantCommand(intake::intakeIn)
                         )
                 ),
 
+                // Drive to the partner-side shooting position, then feed for the specified time.
+                // Shoot from the partner side.
+                fixedShot.prepare(1120, 89.5),
                 fromCurrentPose(robot.motion, RED_SHOOT_TEAMMATE_CONTROL_1, RED_SHOOT_TEAMMATE_CONTROL_2, RED_SHOOT_TEAMMATE),
                 new WaitCommand(SHOOTER_READY_TIME),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
-                new InstantCommand(() -> intake.shovelDown()),
+                new InstantCommand(intake::intakeStop),
+                new InstantCommand(intake::shovelDown),
 
+                // Follow the curve into Flower 2 while collecting within the timed window.
                 new ParallelDeadlineGroup(
                         new WaitCommand(2200),
                         fromCurrentPose(robot.motion, RED_INTAKE_FLOWER_2_CONTROL_FROM_GARDEN, RED_INTAKE_FLOWER_2),
                         new SequentialCommandGroup(
                                 new WaitCommand(1000),
-                                new InstantCommand(() -> intake.intakeIn())
+                                new InstantCommand(intake::intakeIn)
                         )
                 ),
                 new WaitCommand(FLOWER_RELOAD_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
 
+                // Raise the shovels while moving to the Flower 2 shooting position.
+                fixedShot.prepare(1120, 89.5),
                 new ParallelCommandGroup(
                         fromCurrentPose(robot.motion, RED_SHOOT_FLOWER_2),
                         new SequentialCommandGroup(
                                 new WaitCommand(800),
-                                new InstantCommand(() -> intake.shovelUp())
+                                new InstantCommand(intake::shovelUp)
                         )
                 ),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME),
-                new InstantCommand(() -> intake.intakeStop()),
-                new InstantCommand(() -> doneShooting = true),
-                new InstantCommand(() -> shooter.stop()),
+                new InstantCommand(intake::intakeStop),
+                new InstantCommand(shooter::stop),
 
+                // Drive to the parking point and let the robot settle before handing off its pose.
                 fromCurrentPose(robot.motion, RED_PARK_CONTROL, RED_PARK),
                 fromCurrentPose(robot.motion, RED_PARK_FINAL).setMaxPower(0.5),
                 new WaitCommand(1000),
 
                 new WaitCommand(100),
-                new InstantCommand(robot.motion::cancel)
+                new InstantCommand(this::requestOpModeStop)
         );
     }
 }

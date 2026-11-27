@@ -8,9 +8,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.commands.FixedShot;
 import org.firstinspires.ftc.teamcode.kernel.Alliance;
 import org.firstinspires.ftc.teamcode.kernel.KernelOpMode;
 import org.firstinspires.ftc.teamcode.kernel.profiles.RobotProfile;
@@ -19,7 +17,6 @@ import org.firstinspires.ftc.teamcode.subsystems.CompetitionProfile;
 import org.firstinspires.ftc.teamcode.subsystems.Drawing;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
-import org.firstinspires.ftc.teamcode.subsystems.TargetSelector;
 import org.firstinspires.ftc.teamcode.subsystems.autoTurretAim;
 
 abstract class CompetitionAuto extends KernelOpMode {
@@ -29,9 +26,7 @@ abstract class CompetitionAuto extends KernelOpMode {
     private autoTurretAim turret;
     protected Intake intake;
     protected Shooter shooter;
-    protected boolean doneShooting;
-    protected double distanceCorrection;
-    protected double degreeCorrection;
+    protected FixedShot fixedShot;
 
     protected abstract Pose startingPose();
 
@@ -54,6 +49,7 @@ abstract class CompetitionAuto extends KernelOpMode {
         shooter = robot.require(Shooter.class);
         intake = robot.require(Intake.class);
         turret = robot.require(autoTurretAim.class);
+        fixedShot = new FixedShot(shooter, turret, intake);
         panels = PanelsTelemetry.INSTANCE.getTelemetry();
         Drawing.init();
         intake.shovelUp();
@@ -79,19 +75,7 @@ abstract class CompetitionAuto extends KernelOpMode {
     protected final void onLoop() {
         publishPose();
         commands.run();
-        // Preserve the tuned follower update both before and after the command scheduler.
-        follower.update();
         Drawing.drawDebug(follower);
-
-        Pose pose = robot.motion.pose();
-        Pose2D current = new Pose2D(DistanceUnit.INCH, pose.getX(), pose.getY(),
-                AngleUnit.RADIANS, pose.getHeading());
-        turret.aimAt(current, TargetSelector.getTarget(current, robot.alliance() == Alliance.RED), degreeCorrection);
-        if (doneShooting) {
-            shooter.setPollenPower(0.5);
-        } else {
-            shooter.setPollenVelocityByDistance(turret.getDistanceInches() + distanceCorrection);
-        }
         panels.update();
     }
 

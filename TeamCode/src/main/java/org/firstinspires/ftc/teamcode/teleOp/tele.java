@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.DeviceStatus;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.kernel.Alliance;
 import org.firstinspires.ftc.teamcode.kernel.input.Key;
 import org.firstinspires.ftc.teamcode.subsystems.TargetSelector;
 
+/** Field-centric driving with motion-compensated aim. The touchpad toggles manual driving. */
 @TeleOp
 public class tele extends CompetitionTeleOp {
     private boolean shooterOn;
@@ -21,7 +23,7 @@ public class tele extends CompetitionTeleOp {
     @Override
     protected void onInit() {
         super.onInit();
-        robot.alliance(Alliance.RED);
+        robot.alliance(allianceFromAuto());
         drivetrain.setPosition(startingPoseFromAuto());
     }
 
@@ -35,23 +37,31 @@ public class tele extends CompetitionTeleOp {
         if (robot.gp1.takePress(Key.TOUCHPAD)) manual = !manual;
 
         Pose2D current = drivetrain.getPosition();
-        boolean leftTarget = current.getY(DistanceUnit.INCH) > TargetSelector.MID;
+        boolean red = robot.alliance() == Alliance.RED;
+        boolean leftTarget = red == (current.getY(DistanceUnit.INCH) > TargetSelector.MID);
+        boolean poseReady = drivetrain.getLocalizationStatus() == DeviceStatus.READY
+                && Double.isFinite(current.getX(DistanceUnit.INCH))
+                && Double.isFinite(current.getY(DistanceUnit.INCH))
+                && Double.isFinite(current.getHeading(AngleUnit.DEGREES));
         double distanceCorrection = leftTarget ? leftDistance : 0.0;
         double turretCorrection = leftTarget ? leftTurret : 0.0;
 
+        turret.setEnabled(manual || poseReady);
         if (manual) {
             driveRobotCentric();
             turret.setAngleDegrees(0.0);
-        } else {
-            driveFieldCentric(0.0);
-            Pose2D target = TargetSelector.getTargetForSide(true, leftTarget);
+        } else if (poseReady) {
+            driveFieldCentric(red ? 0.0 : 180.0);
+            Pose2D target = TargetSelector.getTargetForSide(red, leftTarget);
             turret.aimAtWithMotionCompensation(current, target, turretCorrection,
                     drivetrain.getVelocityXInchesPerSecond(), drivetrain.getVelocityYInchesPerSecond());
+        } else {
+            drivetrain.stop();
         }
 
         updateIntake(0);
         if (robot.gp1.takePress(Key.LEFT_BUMPER)) shooterOn = !shooterOn;
-        if (shooterOn) {
+        if (shooterOn && (manual || poseReady)) {
             double distance = manual ? 40 : turret.getDistanceInches();
             shooter.setPollenVelocityByDistance(distance + distanceCorrection);
         } else {

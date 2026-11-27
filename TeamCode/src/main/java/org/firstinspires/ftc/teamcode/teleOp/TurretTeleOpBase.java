@@ -16,6 +16,10 @@ import org.firstinspires.ftc.teamcode.subsystems.TargetSelector;
 
 import java.util.Locale;
 
+/**
+ * Shares the controls for both turret driving modes. Set the starting pose and alliance in Panels
+ * before START, or disable the custom pose to resume from autonomous.
+ */
 @Configurable
 public abstract class TurretTeleOpBase extends CompetitionTeleOp {
     public static boolean USE_CUSTOM_START_POSE = true;
@@ -29,7 +33,6 @@ public abstract class TurretTeleOpBase extends CompetitionTeleOp {
     public static double PANEL_START_POSITION = 0.50;
 
     private static final double TRIGGER_THRESHOLD = 0.05;
-    private static final double FLYWHEEL_START_TICKS_PER_SECOND = 1400.0;
     private static final double FLYWHEEL_STEP_TICKS_PER_SECOND = 10.0;
     private static final double AIM_STEP_DEG = 2.0;
     private static final double PANEL_STEP = 0.01;
@@ -38,7 +41,9 @@ public abstract class TurretTeleOpBase extends CompetitionTeleOp {
     private final ElapsedTime loopTimer = new ElapsedTime();
     private boolean highY;
     private boolean flywheelOn;
-    private double flywheelTarget = FLYWHEEL_START_TICKS_PER_SECOND;
+    private double flywheelBase;
+    private double flywheelTrim;
+    private double flywheelTarget;
     private double leftTargetTrim;
     private double rightTargetTrim;
     private double headlessForwardDeg;
@@ -76,6 +81,7 @@ public abstract class TurretTeleOpBase extends CompetitionTeleOp {
         highY = start.getY(DistanceUnit.INCH) > TargetSelector.MID;
         headlessForwardDeg = HEADLESS_FORWARD_DEG;
         panelPosition = PANEL_START_POSITION;
+        flywheelBase = shooter.getMeasuredFlywheelVelocity(0.0);
         loopTimer.reset();
     }
 
@@ -100,7 +106,7 @@ public abstract class TurretTeleOpBase extends CompetitionTeleOp {
         Pose2D target = TargetSelector.getTargetForSide(red, leftTarget);
         updateAim(current, target, poseReady, leftTarget);
 
-        double measuredVelocity = updateFlywheel(showTelemetry);
+        double measuredVelocity = updateFlywheel(poseReady, showTelemetry);
         updateIntake(TRIGGER_THRESHOLD);
         double appliedPanelPosition = updatePanel();
         if (robot.gp1.takePress(Key.Y)) intake.shovelUp();
@@ -139,15 +145,25 @@ public abstract class TurretTeleOpBase extends CompetitionTeleOp {
         turret.aimAt(current, target, leftTarget ? leftTargetTrim : rightTargetTrim);
     }
 
-    private double updateFlywheel(boolean showTelemetry) {
+    private double updateFlywheel(boolean poseReady, boolean showTelemetry) {
+        // Keep the last valid baseline through a temporary localization outage.
+        if (poseReady) {
+            double baseline = shooter.getMeasuredFlywheelVelocity(turret.getDistanceInches());
+            if (Double.isFinite(baseline)) flywheelBase = baseline;
+        }
+
         if (robot.gp1.takePress(Key.LEFT_BUMPER)) flywheelOn = !flywheelOn;
-        if (robot.gp1.takePress(Key.DPAD_UP) || robot.gp2.takePress(Key.DPAD_UP)) {
-            flywheelTarget += FLYWHEEL_STEP_TICKS_PER_SECOND;
+        boolean up1 = robot.gp1.takePress(Key.DPAD_UP);
+        boolean up2 = robot.gp2.takePress(Key.DPAD_UP);
+        boolean down1 = robot.gp1.takePress(Key.DPAD_DOWN);
+        boolean down2 = robot.gp2.takePress(Key.DPAD_DOWN);
+        double step = ((up1 || up2 ? 1 : 0) - (down1 || down2 ? 1 : 0)) * FLYWHEEL_STEP_TICKS_PER_SECOND;
+        double maxVelocity = Math.max(0.0, Shooter.POLLEN_VELOCITY_MAX);
+        flywheelTarget = Range.clip(flywheelBase + flywheelTrim, 0.0, maxVelocity);
+        if (step != 0.0) {
+            flywheelTarget = Range.clip(flywheelTarget + step, 0.0, maxVelocity);
+            flywheelTrim = flywheelTarget - flywheelBase;
         }
-        if (robot.gp1.takePress(Key.DPAD_DOWN) || robot.gp2.takePress(Key.DPAD_DOWN)) {
-            flywheelTarget -= FLYWHEEL_STEP_TICKS_PER_SECOND;
-        }
-        flywheelTarget = Range.clip(flywheelTarget, 0.0, Math.max(0.0, Shooter.POLLEN_VELOCITY_MAX));
         boolean runFlywheel = flywheelOn && flywheelTarget > 0.0;
         double measuredVelocity = (runFlywheel || showTelemetry) ? shooter.getPollenVelocity() : 0.0;
         if (runFlywheel) shooter.setPollenMotorVelocity(flywheelTarget, measuredVelocity);
@@ -174,6 +190,8 @@ public abstract class TurretTeleOpBase extends CompetitionTeleOp {
                 target.getX(DistanceUnit.INCH), target.getY(DistanceUnit.INCH)));
         robot.telemetry.data("Aim trim L / R (deg)", String.format(Locale.US, "%.1f / %.1f", leftTargetTrim, rightTargetTrim));
         robot.telemetry.data("Flywheel", flywheelOn ? "ON" : "OFF");
+        robot.telemetry.data("Flywheel base / trim (ticks/s)", String.format(Locale.US, "%.0f / %+.0f",
+                flywheelBase, flywheelTrim));
         robot.telemetry.data("Flywheel setpoint / actual (ticks/s)", String.format(Locale.US, "%.0f / %.0f",
                 flywheelTarget, measuredVelocity));
         robot.telemetry.data("Panel", appliedPanelPosition);

@@ -8,8 +8,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 @Configurable
 public final class TargetSelector {
-    public static double RED_X = 58.0, RED_LEFT_Y = 85.0, RED_RIGHT_Y = 55.0;
-    public static double BLUE_X = 84.0, BLUE_LEFT_Y = 55.0, BLUE_RIGHT_Y = 85.0;
+    public static double RED_X = 58.0, RED_LEFT_Y = 88.0, RED_RIGHT_Y = 54.0;
+    public static double BLUE_X = 84.0, BLUE_LEFT_Y = 54.0, BLUE_RIGHT_Y = 88.0;
     public static double MID = 70.75;
 
     private TargetSelector() {}

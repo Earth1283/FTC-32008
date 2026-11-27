@@ -35,7 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Start with localization, then measure velocity and coast-down before tuning PIDF.
+ * Select Pedro Pathing > Tuning on the Driver Station, then choose a test during INIT.
+ * Verify localization, measure velocity and coast-down, tune PIDF, and validate with test paths.
+ * Automatic tuners move the robot. The Swerve menu is for swerve hardware.
  * @author Baron Henderson - 20077 The Indubitables
  * @version 1.0, 6/26/2025
  */
@@ -135,6 +137,7 @@ public class Tuning extends SelectableOpMode {
  * @version 1.0, 5/6/2024
  */
 class LocalizationTest extends OpMode {
+    // Push the robot to check X, Y, and heading. After START, gamepad 1 can drive and A toggles debug data.
     boolean debugStringEnabled = false;
 
     @Override
@@ -193,6 +196,7 @@ class LocalizationTest extends OpMode {
  * @version 1.0, 5/6/2024
  */
 class ForwardTuner extends OpMode {
+    // Push straight forward 48 inches and compare the measured distance with odometry.
     public static double DISTANCE = 48;
 
     @Override
@@ -229,6 +233,7 @@ class ForwardTuner extends OpMode {
  * @version 2.0, 6/26/2025
  */
 class LateralTuner extends OpMode {
+    // Push sideways to the right 48 inches without turning and compare with odometry.
     public static double DISTANCE = 48;
 
     @Override
@@ -265,6 +270,7 @@ class LateralTuner extends OpMode {
  * @version 1.0, 5/6/2024
  */
 class TurnTuner extends OpMode {
+    // Rotate in place and compare the accumulated heading with the measured turn.
     public static double ANGLE = 2 * Math.PI;
 
     @Override
@@ -304,6 +310,7 @@ class TurnTuner extends OpMode {
  * @version 1.0, 3/13/2024
  */
 class ForwardVelocityTuner extends OpMode {
+    // Leave room for a full-power forward run. Use Driver Station STOP to exit.
     private final ArrayList<Double> velocities = new ArrayList<>();
     public static double DISTANCE = 48;
     public static double RECORD_NUMBER = 10;
@@ -393,6 +400,7 @@ class ForwardVelocityTuner extends OpMode {
  * @version 1.0, 3/13/2024
  */
 class LateralVelocityTuner extends OpMode {
+    // Leave room for a full-power strafe. Use Driver Station STOP to exit.
     private final ArrayList<Double> velocities = new ArrayList<>();
 
     public static double DISTANCE = 48;
@@ -477,6 +485,7 @@ class LateralVelocityTuner extends OpMode {
  * @version 1.0, 3/13/2024
  */
 class ForwardZeroPowerAccelerationTuner extends OpMode {
+    // Accelerate forward and measure how quickly speed drops after cutting power.
     private final ArrayList<Double> accelerations = new ArrayList<>();
     public static double VELOCITY = 30;
 
@@ -568,6 +577,7 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
  * @version 1.0, 3/13/2024
  */
 class LateralZeroPowerAccelerationTuner extends OpMode {
+    // Accelerate sideways and measure how quickly speed drops after cutting power.
     private final ArrayList<Double> accelerations = new ArrayList<>();
     public static double VELOCITY = 30;
     private double previousVelocity;
@@ -655,6 +665,7 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
  * @version 1.0, 12/26/2025
  */
 class PredictiveBrakingTuner extends OpMode {
+    // Follow telemetry prompts to collect braking samples and fit the braking model.
     private static final double[] TEST_POWERS =
             {1, 1, 1, 0.9, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2};
     private static final double BRAKING_POWER = -0.2;
@@ -829,6 +840,7 @@ class PredictiveBrakingTuner extends OpMode {
  * @version 1.0, 3/12/2024
  */
 class TranslationalTuner extends OpMode {
+    // Displace the robot while holding its heading and observe how it returns.
     public static double DISTANCE = 40;
     private boolean forward = true;
 
@@ -892,6 +904,7 @@ class TranslationalTuner extends OpMode {
  * @version 1.0, 3/12/2024
  */
 class HeadingTuner extends OpMode {
+    // Turn the robot and observe how it returns to the commanded heading.
     public static double DISTANCE = 40;
     private boolean forward = true;
 
@@ -954,6 +967,7 @@ class HeadingTuner extends OpMode {
  * @version 1.0, 3/12/2024
  */
 class DriveTuner extends OpMode {
+    // Follow straight paths repeatedly and watch for overshoot and settling at each endpoint.
     public static double DISTANCE = 40;
     private boolean forward = true;
 
@@ -1025,6 +1039,7 @@ class DriveTuner extends OpMode {
  * @version 1.0, 3/12/2024
  */
 class Line extends OpMode {
+    // Run a straight path to check tracking and error at the endpoint.
     public static double DISTANCE = 40;
     private boolean forward = true;
 
@@ -1084,6 +1099,7 @@ class Line extends OpMode {
  * @version 1.0, 3/13/2024
  */
 class CentripetalTuner extends OpMode {
+    // Follow a curve in both directions and check for inward or outward drift.
     public static double DISTANCE = 20;
     private boolean forward = true;
 
@@ -1142,6 +1158,7 @@ class CentripetalTuner extends OpMode {
  * @version 1.0, 12/30/2024
  */
 class Triangle extends OpMode {
+    // Follow a triangle to verify path transitions and turning.
 
     private final Pose startPose = new Pose(72, 72, Math.toRadians(0));
     private final Pose interPose = new Pose(24 + 72, -24 + 72, Math.toRadians(90));
@@ -1197,6 +1214,7 @@ class Triangle extends OpMode {
  * @version 1.0, 3/12/2024
  */
 class Circle extends OpMode {
+    // Follow a continuous curve to check circular tracking.
     public static double RADIUS = 10;
     private PathChain circle;
 
@@ -1244,6 +1262,7 @@ class Circle extends OpMode {
  * @author Kabir Goyal
  */
 class AnalogMinMaxTuner extends OpMode {
+    // Measure the analog steering sensor limits for swerve modules.
     //populate the below with your names for the servos and encoders
     public String[] encoderNames = {"leftFrontEncoder", "rightFrontEncoder", "leftBackEncoder", "rightBackEncoder"};
     public AnalogInput[] encoders = new AnalogInput[encoderNames.length];
@@ -1301,6 +1320,7 @@ class AnalogMinMaxTuner extends OpMode {
  * @author Kabir Goyal
  */
 class SwerveOffsetsTest extends OpMode {
+    // Verify the zero position offsets of the swerve modules.
     boolean debugStringEnabled = false;
 
     @Override
@@ -1350,6 +1370,7 @@ class SwerveOffsetsTest extends OpMode {
  * @author Kabir Goyal
  */
 class SwerveTurnTest extends OpMode {
+    // Verify swerve module rotation and heading.
     boolean debugStringEnabled = false;
 
     @Override
@@ -1401,6 +1422,7 @@ class SwerveTurnTest extends OpMode {
  * @author Baron Henderson
  */
 class OffsetsTuner extends OpMode {
+    // Zero localizer offsets before measuring. Pinpoint also has a dedicated tuner.
     @Override
     public void init() {
         follower.setStartingPose(new Pose(72,72));

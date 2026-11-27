@@ -15,7 +15,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+@Autonomous(name = "Flower - Preload and Park")
 public class FLOWER_0TIP_COOP extends CompetitionAuto {
     @Override
     protected Pose startingPose() {
@@ -25,18 +25,19 @@ public class FLOWER_0TIP_COOP extends CompetitionAuto {
     @Override
     protected Command buildRoute() {
         return new SequentialCommandGroup(
-
+                // Spin up the flywheel and wait for the cooperative shooting window before feeding.
+                // Shoot the preload. Flywheel speed is in ticks per second and turret angle is relative to the chassis.
+                fixedShot.prepare(1140, -90), // Verify this angle on the robot.
                 new WaitCommand(SHOOTER_START_TIME),
                 new WaitCommand(3400),
-                new InstantCommand(() -> intake.intakeFeed()),
+                fixedShot.feed(),
                 new WaitCommand(EMPTY_MAGAZINE_TIME + 200),
-                new InstantCommand(() -> intake.intakeStop()),
+                new InstantCommand(intake::intakeStop),
+                new InstantCommand(shooter::stop),
 
                 fromPose(robot.motion, RED_PARK_S, RED_PARK_M),
                 fromCurrentPose(robot.motion, RED_PARK_E),
-
-                new InstantCommand(() -> doneShooting = true),
-                new InstantCommand(robot.motion::cancel)
+                new InstantCommand(this::requestOpModeStop)
         );
     }
 }

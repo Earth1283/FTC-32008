@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kernel.Kernel;
 import org.firstinspires.ftc.teamcode.kernel.Subsystem;
@@ -18,7 +19,10 @@ import java.util.function.Function;
 public class Intake implements Subsystem {
     private DcMotorEx intake, trans;
     private Servo leftShovel, rightShovel, leftGate, rightGate;
-    public static double feedingPower = 1.0;
+    private static final double FEED_GATE_DELAY_MS = 100.0;
+    public static double feedingPower = 0.8;
+    private final ElapsedTime feedGateTimer = new ElapsedTime();
+    private boolean feedGateOpened;
 
     public void init(HardwareMap hardwareMap) {
         bind(name -> hardwareMap.get(DcMotorEx.class, name), name -> hardwareMap.get(Servo.class, name));
@@ -49,6 +53,7 @@ public class Intake implements Subsystem {
     }
 
     public void intakeOut() {
+        feedGateOpened = false;
         intake.setPower(-1);
         trans.setPower(-1);
         openGate();
@@ -62,8 +67,20 @@ public class Intake implements Subsystem {
 
     public void intakeFeed() {
         intake.setPower(feedingPower);
-        trans.setPower(feedingPower);
+        trans.setPower(1.0);
         openGate();
+    }
+
+    /** Call while the feed button is held to give the gate time to open. */
+    public void intakeFeedWithGateDelay() {
+        if (!feedGateOpened) {
+            intake.setPower(0);
+            trans.setPower(0);
+            openGate();
+            feedGateTimer.reset();
+            feedGateOpened = true;
+        }
+        if (feedGateTimer.milliseconds() >= FEED_GATE_DELAY_MS) intakeFeed();
     }
 
     public void shovelDown() {
@@ -87,6 +104,7 @@ public class Intake implements Subsystem {
     }
 
     public void closeGate() {
+        feedGateOpened = false;
         leftGate.setPosition(LEFT_GATE_CLOSED);
         rightGate.setPosition(RIGHT_GATE_CLOSED);
     }

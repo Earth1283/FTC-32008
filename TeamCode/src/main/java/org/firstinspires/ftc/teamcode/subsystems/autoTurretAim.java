@@ -132,6 +132,11 @@ public final class autoTurretAim implements Subsystem {
         return updateAngle(angleDeg, false, 0.0);
     }
 
+    /** Whether the latest request is within calibrated travel with output enabled. */
+    public boolean isRequestedAngleInRange() {
+        return enabled && angleWithinTravel();
+    }
+
     public boolean setAngleDegreesForSyncTest(double angleDeg, double rightServoTrim) {
         distanceInches = Double.NaN;
         if (!Double.isFinite(rightServoTrim)) {
@@ -182,7 +187,7 @@ public final class autoTurretAim implements Subsystem {
 
         double limit = allowedHalfTravelDeg;
         limitedDeg = Range.clip(angleDeg, -limit, limit);
-        boolean inRange = Math.abs(angleDeg - limitedDeg) <= 1e-6;
+        boolean inRange = angleWithinTravel();
         boolean holdOutOfRange = tracking && !inRange;
         boolean hasPreviousAngle = Double.isFinite(lastCommandedDeg);
         if (holdOutOfRange && !hasPreviousAngle) {
@@ -229,6 +234,10 @@ public final class autoTurretAim implements Subsystem {
             outputStatus = "Holding within deadband";
         }
         return inRange;
+    }
+
+    private boolean angleWithinTravel() {
+        return Math.abs(requestedDeg - limitedDeg) <= 1e-6;
     }
 
     private static boolean validCalibration(double atLeft130, double atLeft90, double center,

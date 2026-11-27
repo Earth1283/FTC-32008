@@ -11,7 +11,7 @@ public class AutoConst {
     public static long FLOWER_RELOAD_TIME = 200;
 
     public static Pose RED_START = new Pose(57, 6.7, Math.toRadians(180));
-    public static Pose RED_START_FLOWER = new Pose(62, 130, Math.toRadians(90));
+    public static Pose RED_START_FLOWER = new Pose(61, 134.5, Math.toRadians(180));
     public static Pose RED_INTAKE_GARDEN = new Pose(21, 6.7, Math.toRadians(180));
     public static Pose RED_INTAKE_GARDEN_2 = new Pose(9, 6.7, Math.toRadians(180));
     public static Pose RED_SHOOT_GARDEN = new Pose(37, 122, Math.toRadians(50));
@@ -37,9 +37,9 @@ public class AutoConst {
     public static Pose RED_PARK_CONTROL = new Pose(30, 20);
     public static Pose RED_PARK_FINAL = new Pose(9, 95, Math.toRadians(90));
     public static Pose RED_PARK_SURE = new Pose(14, 95, Math.toRadians(90));
-    public static Pose RED_PARK_FROM_FLOWER = new Pose(9, 120, Math.toRadians(90));
-    public static Pose RED_PARK_S = new Pose(33, 135, Math.toRadians(180));
-    public static Pose RED_PARK_M = new Pose(10, 132, Math.toRadians(180));
-    public static Pose RED_PARK_E = new Pose(10, 115, Math.toRadians(180));
+    public static Pose RED_PARK_FROM_FLOWER = new Pose(9, 120, 0);
+    public static Pose RED_PARK_S = new Pose(33, 135, 0);
+    public static Pose RED_PARK_M = new Pose(10, 132, 0);
+    public static Pose RED_PARK_E = new Pose(10, 115, 0);
 
 }

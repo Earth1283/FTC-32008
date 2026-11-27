@@ -16,9 +16,21 @@ public final class FollowPathCommand extends CommandBase {
     private final Pose endPose;
     private final Pose[] controlPoints;
     private double maxPower = 1.0;
+    private double brakingStrength = 1.0;
+    private boolean holdEnd = true;
+    private boolean tangentHeading;
+    private boolean reverseHeading;
 
     public static FollowPathCommand fromCurrentPose(Motion motion, Pose... waypoints) {
         return new FollowPathCommand(motion, motion::pose, waypoints);
+    }
+
+    /** The end pose sets the position. The chassis follows the path tangent. */
+    public static FollowPathCommand fromCurrentPoseTangent(Motion motion, boolean reversed, Pose... waypoints) {
+        FollowPathCommand command = fromCurrentPose(motion, waypoints);
+        command.tangentHeading = true;
+        command.reverseHeading = reversed;
+        return command;
     }
 
     public static FollowPathCommand fromPose(Motion motion, Pose start, Pose... waypoints) {
@@ -42,11 +54,25 @@ public final class FollowPathCommand extends CommandBase {
         return this;
     }
 
+    public FollowPathCommand setBrakingStrength(double brakingStrength) {
+        this.brakingStrength = brakingStrength;
+        return this;
+    }
+
+    public FollowPathCommand setHoldEnd(boolean holdEnd) {
+        this.holdEnd = holdEnd;
+        return this;
+    }
+
     @Override
     public void initialize() {
         Path path = Route.segment(startPose.get(), endPose, controlPoints);
-        path.setBrakingStrength(1.0);
-        motion.follow(path, true, maxPower);
+        if (tangentHeading) {
+            path.setTangentHeadingInterpolation();
+            if (reverseHeading) path.reverseHeadingInterpolation();
+        }
+        path.setBrakingStrength(brakingStrength);
+        motion.follow(path, holdEnd, maxPower);
     }
 
     @Override

@@ -120,15 +120,15 @@ public class AutoTurretAimTest extends LinearOpMode {
             display.addData("Target X / Y (in)", "%.1f / %.1f", TARGET_X_IN, TARGET_Y_IN);
             aim.addTelemetry(display);
             if (directAngle) {
-                display.addData("右舵机同步微调（请求）", "%+.5f", SYNC_RIGHT_TRIM);
+                display.addData("Requested right servo sync trim", "%+.5f", SYNC_RIGHT_TRIM);
             } else {
-                display.addData("右舵机同步微调", "直角度模式可调");
+                display.addData("Right servo sync trim", "Adjustable in direct angle mode");
             }
             double positionDifference = aim.getLastServoPositionDifference();
             if (Double.isFinite(positionDifference)) {
-                display.addData("舵机位置指令差（右减左）", "%+.5f", positionDifference);
+                display.addData("Servo command difference (right minus left)", "%+.5f", positionDifference);
             } else {
-                display.addData("舵机位置指令差（右减左）", "等待下发");
+                display.addData("Servo command difference (right minus left)", "Waiting for command");
             }
             display.update();
             sleep(20);
